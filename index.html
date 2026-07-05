@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz LVANÖ</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h1 {
+    text-align: center;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.question {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#result {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 20px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Quiz LVANÖ</h1>
+
+<!-- NEU: Name -->
+<input type="text" id="username" placeholder="Dein Name">
+
+<form id="quizForm">
+
+<div class="question">
+<h3>Frage 1: Wie viele Bundesländer hat Österreich?</h3>
+<label><input type="radio" name="q1" value="8"> 8</label><br>
+<label><input type="radio" name="q1" value="9"> 9</label><br>
+<label><input type="radio" name="q1" value="10"> 10</label><br>
+</div>
+
+<div class="question">
+<h3>Frage 2: Welche Farbe hat der Himmel an einem klaren Tag?</h3>
+<label><input type="radio" name="q2" value="blau"> Blau</label><br>
+<label><input type="radio" name="q2" value="grün"> Grün</label><br>
+<label><input type="radio" name="q2" value="rot"> Rot</label><br>
+</div>
+
+<button type="button" onclick="checkAnswers()">Auswerten</button>
+
+</form>
+
+<h2 id="result"></h2>
+
+</div>
+
+<script>
+
+function checkAnswers() {
+
+    const name = document.getElementById("username").value;
+
+    if (name === "") {
+        alert("Bitte Namen eingeben!");
+        return;
+    }
+
+    let score = 0;
+
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    if (q1 && q1.value === "9") score++;
+
+    const q2 = document.querySelector('input[name="q2"]:checked');
+    if (q2 && q2.value === "blau") score++;
+
+    document.getElementById("result").innerText =
+        name + ", du hast " + score + " von 2 Punkten erreicht!";
+}
+
+</script>
+
+</body>
+</html>
