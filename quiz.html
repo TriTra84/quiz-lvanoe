@@ -24,65 +24,60 @@
 
 <div class="quiz-info">
 
-Frage <span id="frageNummer">1</span> von 20
+Frage <span id="frageNummer">1</span> von <span id="gesamtFragen">20</span>
 
 </div>
 
 
 <div class="progress">
 
-<div class="progress-bar"></div>
+<div class="progress-bar" id="fortschritt"></div>
 
 </div>
 
 
 
-<div class="quiz-question">
+<div id="quizBereich">
 
-Wie viele Bundesländer hat Österreich?
+
+<div class="quiz-question" id="frage">
+
+Frage wird geladen...
 
 </div>
 
 
+<div id="antwortBereich">
 
-<div class="answer">
-○ 8
+
 </div>
 
 
-<div class="answer">
-○ 9
-</div>
-
-
-<div class="answer">
-○ 10
-</div>
-
-
-<div class="answer">
-○ 11
-</div>
-
-
-
-<button>
+<button id="weiterButton" disabled>
 
 Weiter
 
 </button>
 
 
+</div>
+
+
 
 <div class="version">
 
-Version 0.4 – Quiz Grundgerüst
+Version 1.0 – Quiz Engine
 
 </div>
 
 
 </div>
 
+
+
+<script src="data/fragen.js"></script>
+
+<script src="js/quiz.js"></script>
 
 
 </body>

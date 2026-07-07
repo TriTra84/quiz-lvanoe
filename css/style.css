@@ -124,3 +124,30 @@ button:hover {
     border-radius: 10px;
 
 }
+.answer {
+
+    display: block;
+    margin: 10px 0;
+    padding: 14px;
+    background: #f7f7f7;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    font-size: 18px;
+
+}
+
+
+.answer:hover {
+
+    background: #e8eef5;
+
+}
+
+
+.answer.selected {
+
+    background: #d9eaf7;
+    border-color: #005baa;
+
+}
