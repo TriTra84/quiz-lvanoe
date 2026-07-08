@@ -1,5 +1,6 @@
 let aktuelleFrage = 0;
 let ausgewaehlteAntwort = null;
+let punkte = 0;
 
 
 const frageElement = document.getElementById("frage");
@@ -17,7 +18,9 @@ gesamtFragen.innerText = fragen.length;
 
 function ladeFrage() {
 
+
     ausgewaehlteAntwort = null;
+
     weiterButton.disabled = true;
 
 
@@ -25,6 +28,7 @@ function ladeFrage() {
 
 
     frageElement.innerText = frage.frage;
+
 
     frageNummer.innerText = aktuelleFrage + 1;
 
@@ -34,11 +38,12 @@ function ladeFrage() {
     fortschritt.style.width = prozent + "%";
 
 
+
     antwortBereich.innerHTML = "";
 
 
 
-    // Multiple Choice Frage
+    // Multiple Choice
 
     if (frage.typ === "mc") {
 
@@ -48,7 +53,9 @@ function ladeFrage() {
 
             let element = document.createElement("div");
 
+
             element.className = "answer";
+
 
             element.innerText = antwort;
 
@@ -64,15 +71,20 @@ function ladeFrage() {
                 });
 
 
+
                 element.classList.add("selected");
+
 
 
                 ausgewaehlteAntwort = index;
 
 
+
                 weiterButton.disabled = false;
 
+
             };
+
 
 
             antwortBereich.appendChild(element);
@@ -82,6 +94,7 @@ function ladeFrage() {
 
 
     }
+
 
 
 
@@ -95,7 +108,9 @@ function ladeFrage() {
 
         eingabe.type = "number";
 
+
         eingabe.className = "answer";
+
 
         eingabe.placeholder = "Bitte Zahl eingeben";
 
@@ -119,6 +134,7 @@ function ladeFrage() {
         };
 
 
+
         antwortBereich.appendChild(eingabe);
 
 
@@ -126,6 +142,8 @@ function ladeFrage() {
 
 
 }
+
+
 
 
 
@@ -140,7 +158,49 @@ weiterButton.onclick = function() {
     }
 
 
+
+    const frage = fragen[aktuelleFrage];
+
+
+
+    // Punkteberechnung Multiple Choice
+
+    if (frage.typ === "mc") {
+
+
+        if (ausgewaehlteAntwort == frage.richtig) {
+
+
+            punkte += frage.punkte;
+
+
+        }
+
+
+    }
+
+
+
+    // Punkteberechnung Zahl
+
+    if (frage.typ === "zahl") {
+
+
+        if (Number(ausgewaehlteAntwort) === frage.loesung) {
+
+
+            punkte += frage.punkte;
+
+
+        }
+
+
+    }
+
+
+
     aktuelleFrage++;
+
 
 
     if (aktuelleFrage >= fragen.length) {
@@ -148,9 +208,11 @@ weiterButton.onclick = function() {
 
         quizEnde();
 
+
         return;
 
     }
+
 
 
     ladeFrage();
@@ -162,23 +224,38 @@ weiterButton.onclick = function() {
 
 
 
+
+
 function quizEnde() {
 
 
     document.querySelector(".container").innerHTML = `
 
+
         <h1>Geschafft!</h1>
+
 
         <p class="subtitle">
 
-        Danke für deine Teilnahme am LVA-NÖ Quiz.
+
+        Du hast
+
+
+        <strong>${punkte}</strong>
+
+
+        Punkte erreicht.
+
 
         </p>
+
 
     `;
 
 
 }
+
+
 
 
 
