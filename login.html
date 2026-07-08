@@ -110,19 +110,25 @@ Quiz starten
 
 <div class="version">
 
-Version 0.3 – Teilnehmerverwaltung
+Version 1.3 – Teilnehmerverwaltung
 
 </div>
 
 
 </div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
 
 
 
 <script>
 
 
-function startQuiz() {
+async function startQuiz() {
 
 
 let vorname =
@@ -162,19 +168,56 @@ return;
 
 
 
+let name = vorname + " " + nachname;
+
+
+
+const { data, error } = await supabaseClient
+
+.from("Teilnehmer")
+
+.insert([
+
+{
+
+name: name,
+
+dienststelle: dienststelle,
+
+startzeit: new Date()
+
+}
+
+]);
+
+
+
+if(error) {
+
+
+console.log(error);
+
+alert("Fehler beim Speichern.");
+
+return;
+
+
+}
+
+
+
 alert("Vielen Dank " + vorname + "! Das Quiz startet.");
 
 
-// später:
-// Daten speichern
-// Zeit starten
-// quiz.html öffnen
+
+window.location.href = "quiz.html";
 
 
 }
 
 
 </script>
+
 
 
 </body>
