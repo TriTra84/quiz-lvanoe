@@ -2,6 +2,8 @@ let aktuelleFrage = 0;
 let ausgewaehlteAntwort = null;
 let punkte = 0;
 
+let teilnehmerID = localStorage.getItem("teilnehmer_id");
+
 
 const frageElement = document.getElementById("frage");
 const antwortBereich = document.getElementById("antwortBereich");
@@ -42,8 +44,6 @@ function ladeFrage() {
     antwortBereich.innerHTML = "";
 
 
-
-    // Multiple Choice
 
     if (frage.typ === "mc") {
 
@@ -97,9 +97,6 @@ function ladeFrage() {
 
 
 
-
-    // Zahleneingabe
-
     if (frage.typ === "zahl") {
 
 
@@ -130,7 +127,6 @@ function ladeFrage() {
 
             }
 
-
         };
 
 
@@ -147,8 +143,7 @@ function ladeFrage() {
 
 
 
-
-weiterButton.onclick = function() {
+weiterButton.onclick = async function() {
 
 
     if (ausgewaehlteAntwort === null) {
@@ -162,8 +157,9 @@ weiterButton.onclick = function() {
     const frage = fragen[aktuelleFrage];
 
 
+    let erhaltenePunkte = 0;
 
-    // Punkteberechnung Multiple Choice
+
 
     if (frage.typ === "mc") {
 
@@ -173,6 +169,8 @@ weiterButton.onclick = function() {
 
             punkte += frage.punkte;
 
+            erhaltenePunkte = frage.punkte;
+
 
         }
 
@@ -180,8 +178,6 @@ weiterButton.onclick = function() {
     }
 
 
-
-    // Punkteberechnung Zahl
 
     if (frage.typ === "zahl") {
 
@@ -191,9 +187,47 @@ weiterButton.onclick = function() {
 
             punkte += frage.punkte;
 
+            erhaltenePunkte = frage.punkte;
+
 
         }
 
+
+    }
+
+
+
+    // Antwort in Supabase speichern
+
+    const { error } = await supabaseClient
+
+    .from("Antworten")
+
+    .insert([
+
+        {
+
+            teilnehmer_id: teilnehmerID,
+
+            frage_nr: aktuelleFrage + 1,
+
+            antwort: String(ausgewaehlteAntwort),
+
+            punkte: erhaltenePunkte
+
+        }
+
+    ]);
+
+
+
+    if(error) {
+
+        console.log(error);
+
+        alert("Antwort konnte nicht gespeichert werden.");
+
+        return;
 
     }
 
