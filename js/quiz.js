@@ -2,6 +2,12 @@ let aktuelleFrage = 0;
 let ausgewaehlteAntwort = null;
 let punkte = 0;
 
+let maxPunkte = fragen.reduce(function(summe, frage) {
+
+    return summe + frage.punkte;
+
+}, 0);
+
 let teilnehmerID = localStorage.getItem("teilnehmer_id");
 
 
@@ -292,28 +298,32 @@ if(error) {
 
 
 
-    document.querySelector(".container").innerHTML = `
+document.querySelector(".container").innerHTML = `
+
+<h1>🎉 Quiz abgeschlossen</h1>
 
 
-        <h1>Geschafft!</h1>
+<p class="subtitle">
 
+Dein Ergebnis:
 
-        <p class="subtitle">
+<br><br>
 
+<strong>${punkte}</strong>
 
-        Du hast
+von
 
+<strong>${maxPunkte}</strong>
 
-        <strong>${punkte}</strong>
+Punkten
 
+<br><br>
 
-        Punkte erreicht.
+Vielen Dank für deine Teilnahme!
 
+</p>
 
-        </p>
-
-
-    `;
+`;
 
 
 }
