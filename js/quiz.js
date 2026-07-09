@@ -260,7 +260,36 @@ weiterButton.onclick = async function() {
 
 
 
-function quizEnde() {
+async function quizEnde() {
+
+
+    const { error } = await supabaseClient
+
+    .from("Teilnehmer")
+
+    .update({
+
+        gesamtpunkte: punkte,
+
+        endezeit: new Date()
+
+    })
+
+    .eq("id", teilnehmerID);
+
+
+
+if(error) {
+
+    alert(
+        "Fehler beim Speichern:\n\n" 
+        + error.message
+    );
+
+    return;
+
+}
+
 
 
     document.querySelector(".container").innerHTML = `
