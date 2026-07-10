@@ -2,6 +2,8 @@ let aktuelleFrage = 0;
 let ausgewaehlteAntwort = null;
 let punkte = 0;
 
+let quizStart = new Date();
+
 let maxPunkte = fragen.reduce(function(summe, frage) {
 
     return summe + frage.punkte;
@@ -269,19 +271,53 @@ weiterButton.onclick = async function() {
 async function quizEnde() {
 
 
-    const { error } = await supabaseClient
+const endzeit = new Date();
 
-    .from("Teilnehmer")
 
-    .update({
+const { data: teilnehmer, error: abrufFehler } = await supabaseClient
 
-        gesamtpunkte: punkte,
+.from("Teilnehmer")
 
-        endezeit: new Date()
+.select("startzeit")
 
-    })
+.eq("id", teilnehmerID)
 
-    .eq("id", teilnehmerID);
+.single();
+
+
+
+if (abrufFehler) {
+
+    alert("Startzeit konnte nicht geladen werden.");
+
+    return;
+
+}
+
+
+
+const dauer = endzeit - quizStart;
+
+
+const minuten = Math.floor(dauer / 60000);
+
+const sekunden = Math.floor((dauer % 60000) / 1000);
+
+
+
+const { error } = await supabaseClient
+
+.from("Teilnehmer")
+
+.update({
+
+    gesamtpunkte: punkte,
+
+    endezeit: endzeit
+
+})
+
+.eq("id", teilnehmerID);
 
 
 
@@ -318,6 +354,12 @@ von
 Punkten
 
 <br><br>
+
+⏱ Bearbeitungszeit:
+
+<br>
+
+<strong>${minuten} Minuten ${sekunden} Sekunden</strong>
 
 Vielen Dank für deine Teilnahme!
 
