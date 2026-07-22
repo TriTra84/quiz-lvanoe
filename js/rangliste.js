@@ -161,3 +161,6 @@ else if (index === 2) {
 
 
 ladeRangliste();
+
+// Rangliste alle 30 Sekunden aktualisieren
+setInterval(ladeRangliste, 30000);

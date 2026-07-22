@@ -296,7 +296,7 @@ if (abrufFehler) {
 
 
 
-const dauer = endzeit - quizStart;
+const dauer = endzeit - new Date(teilnehmer.startzeit + "Z");
 
 
 const minuten = Math.floor(dauer / 60000);
