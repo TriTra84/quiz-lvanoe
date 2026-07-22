@@ -8,11 +8,9 @@ async function ladeRangliste() {
 
         .from("Teilnehmer")
 
-        .select("name, dienststelle, gesamtpunkte")
+        .select("name, dienststelle, gesamtpunkte, startzeit, endezeit")
 
-        .not("gesamtpunkte", "is", null)
-
-        .order("gesamtpunkte", { ascending: false });
+        .not("gesamtpunkte", "is", null);
 
 
 
@@ -28,12 +26,58 @@ async function ladeRangliste() {
     }
 
 
+    // Sortierung:
+    // 1. höchste Punkte zuerst
+    // 2. bei gleichen Punkten schnellste Zeit zuerst
+
+    data.sort(function(a, b) {
+
+
+        if (b.gesamtpunkte !== a.gesamtpunkte) {
+
+            return b.gesamtpunkte - a.gesamtpunkte;
+
+        }
+
+
+        let zeitA = new Date(a.endezeit) - new Date(a.startzeit);
+
+        let zeitB = new Date(b.endezeit) - new Date(b.startzeit);
+
+
+        return zeitA - zeitB;
+
+
+    });
+
+
 
     tabelle.innerHTML = "";
 
 
 
     data.forEach(function(teilnehmer, index) {
+
+
+        let dauer = "";
+
+        if (teilnehmer.startzeit && teilnehmer.endezeit) {
+
+let start = new Date(teilnehmer.startzeit + "Z");
+let ende = new Date(teilnehmer.endezeit);
+
+let sekunden = Math.floor(
+    (ende - start) / 1000
+);
+
+            let minuten = Math.floor(sekunden / 60);
+
+            sekunden = sekunden % 60;
+
+            dauer = minuten + ":" + sekunden.toString().padStart(2, "0");
+
+        }
+
 
 
         let zeile = document.createElement("tr");
@@ -48,6 +92,8 @@ async function ladeRangliste() {
             <td>${teilnehmer.dienststelle}</td>
 
             <td>${teilnehmer.gesamtpunkte}</td>
+
+            <td>${dauer}</td>
 
         `;
 
