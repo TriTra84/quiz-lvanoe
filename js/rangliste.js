@@ -10,7 +10,8 @@ async function ladeRangliste() {
 
         .select("name, dienststelle, gesamtpunkte, startzeit, endezeit")
 
-        .not("gesamtpunkte", "is", null);
+        .not("gesamtpunkte", "is", null)
+        .not("endezeit", "is", null)
 
 
 
@@ -52,6 +53,7 @@ async function ladeRangliste() {
 
 
 
+    document.querySelector("#anzahlTeilnehmer").textContent = data.length;
     tabelle.innerHTML = "";
 
 
