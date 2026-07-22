@@ -336,14 +336,24 @@ if(error) {
 
 document.querySelector(".container").innerHTML = `
 
+
 <h1>🎉 Quiz abgeschlossen</h1>
 
 
 <p class="subtitle">
 
-Dein Ergebnis:
+
+Vielen Dank für deine Teilnahme!
+
 
 <br><br>
+
+
+Dein Ergebnis:
+
+
+<br><br>
+
 
 <strong>${punkte}</strong>
 
@@ -353,17 +363,21 @@ von
 
 Punkten
 
-<br><br>
+
+<br><br><br>
+
 
 ⏱ Bearbeitungszeit:
 
+
 <br>
+
 
 <strong>${minuten} Minuten ${sekunden} Sekunden</strong>
 
-Vielen Dank für deine Teilnahme!
 
 </p>
+
 
 `;
 
