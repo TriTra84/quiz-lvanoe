@@ -28,7 +28,6 @@ gesamtFragen.innerText = fragen.length;
 
 function ladeFrage() {
 
-
     ausgewaehlteAntwort = null;
 
     weiterButton.disabled = true;
@@ -94,7 +93,6 @@ function ladeFrage() {
             };
 
 
-
             antwortBereich.appendChild(element);
 
 
@@ -138,12 +136,10 @@ function ladeFrage() {
         };
 
 
-
         antwortBereich.appendChild(eingabe);
 
 
     }
-
 
 }
 
@@ -182,7 +178,6 @@ weiterButton.onclick = async function() {
 
         }
 
-
     }
 
 
@@ -200,12 +195,9 @@ weiterButton.onclick = async function() {
 
         }
 
-
     }
 
 
-
-    // Antwort in Supabase speichern
 
     const { error } = await supabaseClient
 
@@ -271,124 +263,132 @@ weiterButton.onclick = async function() {
 async function quizEnde() {
 
 
-const endzeit = new Date();
-
-
-const { data: teilnehmer, error: abrufFehler } = await supabaseClient
-
-.from("Teilnehmer")
-
-.select("startzeit")
-
-.eq("id", teilnehmerID)
-
-.single();
+    const endzeit = new Date();
 
 
 
-if (abrufFehler) {
+    const { data: teilnehmer, error: abrufFehler } = await supabaseClient
 
-    alert("Startzeit konnte nicht geladen werden.");
+    .from("Teilnehmer")
 
-    return;
+    .select("startzeit")
+
+    .eq("id", teilnehmerID)
+
+    .single();
+
+
+
+    if (abrufFehler) {
+
+        alert("Startzeit konnte nicht geladen werden.");
+
+        return;
+
+    }
+
+
+
+    const dauer = endzeit - new Date(teilnehmer.startzeit + "Z");
+
+
+    const minuten = Math.floor(dauer / 60000);
+
+    const sekunden = Math.floor((dauer % 60000) / 1000);
+
+
+
+    const { error } = await supabaseClient
+
+    .from("Teilnehmer")
+
+    .update({
+
+        gesamtpunkte: punkte,
+
+        endezeit: endzeit
+
+    })
+
+    .eq("id", teilnehmerID);
+
+
+
+    if(error) {
+
+        alert(
+            "Fehler beim Speichern:\n\n" 
+            + error.message
+        );
+
+        return;
+
+    }
+
+
+
+    document.querySelector(".container").innerHTML = `
+
+
+    <h1>🎉 Quiz abgeschlossen</h1>
+
+
+    <p class="subtitle">
+
+
+    Vielen Dank für deine Teilnahme!
+
+
+    <br><br>
+
+
+    Dein Ergebnis:
+
+
+    <br><br>
+
+
+    <strong>${punkte}</strong>
+
+    von
+
+    <strong>${maxPunkte}</strong>
+
+    Punkten
+
+
+    <br><br><br>
+
+
+    ⏱ Bearbeitungszeit:
+
+
+    <br>
+
+
+    <strong>${minuten} Minuten ${sekunden} Sekunden</strong>
+
+
+    <br><br>
+
+
+    <button onclick="window.location.href='rangliste.html'">
+
+    🏆 Zur Rangliste
+
+    </button>
+
+
+    </p>
+
+
+    `;
+
 
 }
 
 
 
-const dauer = endzeit - new Date(teilnehmer.startzeit + "Z");
 
 
-const minuten = Math.floor(dauer / 60000);
-
-const sekunden = Math.floor((dauer % 60000) / 1000);
-
-
-
-const { error } = await supabaseClient
-
-.from("Teilnehmer")
-
-.update({
-
-    gesamtpunkte: punkte,
-
-    endezeit: endzeit
-
-})
-
-.eq("id", teilnehmerID);
-
-
-
-if(error) {
-
-    alert(
-        "Fehler beim Speichern:\n\n" 
-        + error.message
-    );
-
-    return;
-
-}
-
-
-
-document.querySelector(".container").innerHTML = `
-
-
-<h1>🎉 Quiz abgeschlossen</h1>
-
-
-<p class="subtitle">
-
-
-Vielen Dank für deine Teilnahme!
-
-
-<br><br>
-
-
-Dein Ergebnis:
-
-
-<br><br>
-
-
-<strong>${punkte}</strong>
-
-von
-
-<strong>${maxPunkte}</strong>
-
-Punkten
-
-
-<br><br><br>
-
-
-⏱ Bearbeitungszeit:
-
-
-<br>
-
-
-<strong>${minuten} Minuten ${sekunden} Sekunden</strong>
-
-
-<br><br>
-
-
-<button onclick="window.location.href='rangliste.html'">
-
-🏆 Zur Rangliste
-
-</button>
-
-
-</p>
-
-
-`;
-
-}
+ladeFrage();
