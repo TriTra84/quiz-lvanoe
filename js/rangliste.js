@@ -83,6 +83,25 @@ let sekunden = Math.floor(
         let zeile = document.createElement("tr");
 
 
+if (index === 0) {
+
+    zeile.classList.add("platz1");
+
+}
+
+else if (index === 1) {
+
+    zeile.classList.add("platz2");
+
+}
+
+else if (index === 2) {
+
+    zeile.classList.add("platz3");
+
+}
+
+
         zeile.innerHTML = `
 
             <td>${index + 1}</td>
