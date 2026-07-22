@@ -383,7 +383,23 @@ Punkten
 
 
 }
+<strong>${minuten} Minuten ${sekunden} Sekunden</strong>
 
+
+<br><br>
+
+
+<button onclick="window.location.href='rangliste.html'">
+
+🏆 Zur Rangliste
+
+</button>
+
+
+</p>
+
+
+`;
 
 
 
