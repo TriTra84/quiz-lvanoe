@@ -58,7 +58,39 @@ async function ladeRangliste() {
 
 
 
-    data.forEach(function(teilnehmer, index) {
+    let letzterPunktestand = null;
+let letzteZeit = null;
+let platz = 0;
+
+
+data.forEach(function(teilnehmer, index) {
+
+
+    let dauerSekunden = 0;
+
+
+    if (teilnehmer.startzeit && teilnehmer.endezeit) {
+
+        dauerSekunden = Math.floor(
+            (new Date(teilnehmer.endezeit) -
+            new Date(teilnehmer.startzeit + "Z")) / 1000
+        );
+
+    }
+
+
+    if (
+    teilnehmer.gesamtpunkte !== letzterPunktestand ||
+    dauerSekunden !== letzteZeit
+) {
+
+    platz++;
+
+}
+
+
+    letzterPunktestand = teilnehmer.gesamtpunkte;
+    letzteZeit = dauerSekunden;
 
 
         let dauer = "";
@@ -106,7 +138,7 @@ else if (index === 2) {
 
         zeile.innerHTML = `
 
-            <td>${index + 1}</td>
+            <td>${platz}</td>
 
             <td>${teilnehmer.name}</td>
 
