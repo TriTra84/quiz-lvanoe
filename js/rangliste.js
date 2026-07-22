@@ -1,6 +1,12 @@
 const tabelle = document.querySelector("#rangliste tbody");
 
 
+const urlParameter = new URLSearchParams(window.location.search);
+
+const eigeneTeilnehmerID = urlParameter.get("id");
+
+
+
 async function ladeRangliste() {
 
 
@@ -8,10 +14,11 @@ async function ladeRangliste() {
 
         .from("Teilnehmer")
 
-        .select("name, dienststelle, gesamtpunkte, startzeit, endezeit")
+        .select("id, name, dienststelle, gesamtpunkte, startzeit, endezeit")
 
         .not("gesamtpunkte", "is", null)
-        .not("endezeit", "is", null)
+
+        .not("endezeit", "is", null);
 
 
 
@@ -27,9 +34,6 @@ async function ladeRangliste() {
     }
 
 
-    // Sortierung:
-    // 1. höchste Punkte zuerst
-    // 2. bei gleichen Punkten schnellste Zeit zuerst
 
     data.sort(function(a, b) {
 
@@ -54,61 +58,73 @@ async function ladeRangliste() {
 
 
     document.querySelector("#anzahlTeilnehmer").textContent = data.length;
+
     tabelle.innerHTML = "";
 
 
 
     let letzterPunktestand = null;
-let letzteZeit = null;
-let platz = 0;
+    let letzteZeit = null;
+    let platz = 0;
 
 
-data.forEach(function(teilnehmer, index) {
+
+    data.forEach(function(teilnehmer, index) {
 
 
-    let dauerSekunden = 0;
+        let dauerSekunden = 0;
 
 
-    if (teilnehmer.startzeit && teilnehmer.endezeit) {
+        if (teilnehmer.startzeit && teilnehmer.endezeit) {
 
-        dauerSekunden = Math.floor(
-            (new Date(teilnehmer.endezeit) -
-            new Date(teilnehmer.startzeit + "Z")) / 1000
-        );
+            dauerSekunden = Math.floor(
+                (new Date(teilnehmer.endezeit) -
+                new Date(teilnehmer.startzeit + "Z")) / 1000
+            );
 
-    }
-
-
-    if (
-    teilnehmer.gesamtpunkte !== letzterPunktestand ||
-    dauerSekunden !== letzteZeit
-) {
-
-    platz++;
-
-}
+        }
 
 
-    letzterPunktestand = teilnehmer.gesamtpunkte;
-    letzteZeit = dauerSekunden;
+
+        if (
+            teilnehmer.gesamtpunkte !== letzterPunktestand ||
+            dauerSekunden !== letzteZeit
+        ) {
+
+            platz++;
+
+        }
+
+
+
+        letzterPunktestand = teilnehmer.gesamtpunkte;
+        letzteZeit = dauerSekunden;
+
 
 
         let dauer = "";
 
+
         if (teilnehmer.startzeit && teilnehmer.endezeit) {
 
-let start = new Date(teilnehmer.startzeit + "Z");
-let ende = new Date(teilnehmer.endezeit);
 
-let sekunden = Math.floor(
-    (ende - start) / 1000
-);
+            let start = new Date(teilnehmer.startzeit + "Z");
+
+            let ende = new Date(teilnehmer.endezeit);
+
+
+            let sekunden = Math.floor(
+                (ende - start) / 1000
+            );
+
 
             let minuten = Math.floor(sekunden / 60);
 
             sekunden = sekunden % 60;
 
+
             dauer = minuten + ":" + sekunden.toString().padStart(2, "0");
+
 
         }
 
@@ -117,30 +133,44 @@ let sekunden = Math.floor(
         let zeile = document.createElement("tr");
 
 
-if (index === 0) {
 
-    zeile.classList.add("platz1");
+        if (index === 0) {
 
-}
+            zeile.classList.add("platz1");
 
-else if (index === 1) {
+        }
 
-    zeile.classList.add("platz2");
+        else if (index === 1) {
 
-}
+            zeile.classList.add("platz2");
 
-else if (index === 2) {
+        }
 
-    zeile.classList.add("platz3");
+        else if (index === 2) {
 
-}
+            zeile.classList.add("platz3");
+
+        }
+
+
+
+        let nameAnzeige = teilnehmer.name;
+
+
+
+        if (String(teilnehmer.id) === String(eigeneTeilnehmerID)) {
+
+            nameAnzeige = "⭐ " + nameAnzeige;
+
+        }
+
 
 
         zeile.innerHTML = `
 
             <td>${platz}</td>
 
-            <td>${teilnehmer.name}</td>
+            <td>${nameAnzeige}</td>
 
             <td>${teilnehmer.dienststelle}</td>
 
@@ -151,7 +181,9 @@ else if (index === 2) {
         `;
 
 
+
         tabelle.appendChild(zeile);
+
 
 
     });
@@ -160,7 +192,10 @@ else if (index === 2) {
 }
 
 
+
 ladeRangliste();
 
+
 // Rangliste alle 30 Sekunden aktualisieren
+
 setInterval(ladeRangliste, 30000);

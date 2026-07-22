@@ -372,7 +372,7 @@ async function quizEnde() {
     <br><br>
 
 
-    <button onclick="window.location.href='rangliste.html'">
+    <button onclick="window.location.href='rangliste.html?id=${teilnehmerID}'">
 
     🏆 Zur Rangliste
 
