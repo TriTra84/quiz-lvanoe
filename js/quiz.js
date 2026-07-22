@@ -376,16 +376,6 @@ Punkten
 <strong>${minuten} Minuten ${sekunden} Sekunden</strong>
 
 
-</p>
-
-
-`;
-
-
-}
-<strong>${minuten} Minuten ${sekunden} Sekunden</strong>
-
-
 <br><br>
 
 
@@ -401,7 +391,4 @@ Punkten
 
 `;
 
-
-
-
-ladeFrage();
+}
