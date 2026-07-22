@@ -1,4 +1,7 @@
 let aktuelleFrage = 0;
+
+alert("quiz.js wurde geladen");
+
 let ausgewaehlteAntwort = null;
 let punkte = 0;
 
