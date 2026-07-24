@@ -2,13 +2,55 @@ let aktuelleFrage = 0;
 let ausgewaehlteAntwort = null;
 let punkte = 0;
 
+let fragen = [];
+
+let maxPunkte = 0;
+
 let quizStart = new Date();
 
-let maxPunkte = fragen.reduce(function(summe, frage) {
+async function ladeFragen() {
+
+
+    const { data, error } = await supabaseClient
+
+        .from("Fragen")
+
+        .select("*")
+
+        .order("id");
+
+
+    if (error) {
+
+        alert(
+            "Fehler beim Laden der Fragen:\n\n" +
+            error.message
+        );
+
+        return;
+
+    }
+
+
+    fragen = data;
+
+
+alert("Fragen geladen: " + fragen.length);
+    
+
+    maxPunkte = fragen.reduce(function(summe, frage) {
 
     return summe + frage.punkte;
 
 }, 0);
+
+
+
+    ladeFrage();
+
+
+}
+
 
 let teilnehmerID = localStorage.getItem("teilnehmer_id");
 
@@ -55,8 +97,12 @@ function ladeFrage() {
     if (frage.typ === "mc") {
 
 
-        frage.antworten.forEach(function(antwort, index) {
-
+        [
+    frage.antwort_a,
+    frage.antwort_b,
+    frage.antwort_c,
+    frage.antwort_d
+].forEach(function(antwort, index) {
 
             let element = document.createElement("div");
 
@@ -391,4 +437,4 @@ async function quizEnde() {
 
 
 
-ladeFrage();
+ladeFragen();
