@@ -463,10 +463,10 @@ const { data: fragenDaten } = await supabaseClient
 
 
                 text +=
-                    a +
-                    ": " +
-                    anzahlAntwort +
-                    "<br>";
+    "<div class='antwortZeile'>" +
+    "<span>" + a + "</span>" +
+    "<strong>" + anzahlAntwort + "</strong>" +
+    "</div>";
 
 
 
@@ -704,28 +704,28 @@ text +=
 
 
 
-        let block =
-            document.createElement("div");
+let block =
+    document.createElement("div");
+
+
+block.className = "statBlock";
+
+
+block.innerHTML =
+
+    "<h3>Frage " +
+    (index + 1) +
+    "</h3>" +
+
+    "<p><strong>" +
+    frage.frage +
+    "</strong></p>" +
+
+    text;
 
 
 
-        block.innerHTML =
-
-            "<h3>Frage " +
-            (index + 1) +
-            "</h3>" +
-
-            "<p>" +
-            frage.frage +
-            "</p>" +
-
-            text;
-
-
-
-
-
-        bereich.appendChild(block);
+bereich.appendChild(block);
 
 
 
