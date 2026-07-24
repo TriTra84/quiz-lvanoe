@@ -191,9 +191,178 @@ async function ladeRangliste() {
 
 }
 
+async function ladeDienststellenRangliste() {
 
+
+    const { data, error } = await supabaseClient
+
+        .from("Teilnehmer")
+
+        .select("dienststelle, gesamtpunkte")
+
+        .not("gesamtpunkte", "is", null);
+
+
+
+    if (error) {
+
+        alert(
+            "Fehler Dienststellen:\n\n" +
+            error.message
+        );
+
+        return;
+
+    }
+
+
+
+    let dienststellen = {};
+
+
+
+    data.forEach(function(t) {
+
+
+
+        if (!dienststellen[t.dienststelle]) {
+
+            dienststellen[t.dienststelle] = {
+
+                anzahl: 0,
+                punkte: 0
+
+            };
+
+        }
+
+
+
+        dienststellen[t.dienststelle].anzahl++;
+
+
+        dienststellen[t.dienststelle].punkte +=
+            t.gesamtpunkte;
+
+
+
+    });
+
+
+
+
+
+    let liste = Object.keys(dienststellen);
+
+
+
+    liste.sort(function(a, b) {
+
+
+        let aWert =
+            dienststellen[a].punkte /
+            dienststellen[a].anzahl;
+
+
+        let bWert =
+            dienststellen[b].punkte /
+            dienststellen[b].anzahl;
+
+
+
+        return bWert - aWert;
+
+
+    });
+
+
+
+
+
+    let text = "";
+
+
+
+    liste.forEach(function(name, index) {
+
+
+
+        let platz = "";
+
+
+
+        if (index === 0) {
+
+            platz = "🥇 ";
+
+        }
+
+        else if (index === 1) {
+
+            platz = "🥈 ";
+
+        }
+
+        else if (index === 2) {
+
+            platz = "🥉 ";
+
+        }
+
+
+
+        let d =
+            dienststellen[name];
+
+
+
+        text +=
+
+        "<div class='statBlock'>" +
+
+        "<h3>" +
+
+        platz +
+
+        "🏢 " +
+
+        name +
+
+        "</h3>" +
+
+        "Teilnehmer: " +
+
+        d.anzahl +
+
+        "<br>Ø Punkte: " +
+
+        (
+            d.punkte /
+            d.anzahl
+        )
+        .toFixed(1) +
+
+        "</div>";
+
+
+
+    });
+
+
+
+
+
+    document.getElementById(
+        "dienststellenRangliste"
+    ).innerHTML = text;
+
+
+
+}
 
 ladeRangliste();
+
+ladeDienststellenRangliste();
 
 
 // Rangliste alle 30 Sekunden aktualisieren
