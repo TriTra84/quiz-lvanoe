@@ -131,6 +131,7 @@ async function ladeStatistik() {
 
 
     ladeFragenAnalyse();
+    ladeDienststellenAnalyse();
 
 
 }
@@ -138,7 +139,197 @@ async function ladeStatistik() {
 
 
 
+async function ladeDienststellenAnalyse() {
 
+
+    const { data, error } = await supabaseClient
+
+        .from("Teilnehmer")
+
+        .select("dienststelle, gesamtpunkte")
+
+        .not("gesamtpunkte", "is", null);
+
+
+
+    if (error) {
+
+        alert(
+            "Fehler Dienststellen:\n\n" +
+            error.message
+        );
+
+        return;
+
+    }
+
+
+
+    let dienststellen = {};
+
+
+
+    data.forEach(function(t) {
+
+
+
+        if (!dienststellen[t.dienststelle]) {
+
+
+            dienststellen[t.dienststelle] = {
+
+                anzahl: 0,
+                punkte: 0,
+                beste: 0
+
+            };
+
+
+        }
+
+
+
+        dienststellen[t.dienststelle].anzahl++;
+
+
+        dienststellen[t.dienststelle].punkte +=
+            t.gesamtpunkte;
+
+
+
+        if (
+            t.gesamtpunkte >
+            dienststellen[t.dienststelle].beste
+        ) {
+
+            dienststellen[t.dienststelle].beste =
+                t.gesamtpunkte;
+
+        }
+
+
+
+    });
+
+
+
+
+    let liste =
+        Object.keys(dienststellen);
+
+
+
+    liste.sort(function(a, b) {
+
+
+        let durchschnittA =
+            dienststellen[a].punkte /
+            dienststellen[a].anzahl;
+
+
+        let durchschnittB =
+            dienststellen[b].punkte /
+            dienststellen[b].anzahl;
+
+
+
+        return durchschnittB - durchschnittA;
+
+
+    });
+
+
+
+
+    let text = "";
+
+
+
+    liste.forEach(function(name, index) {
+
+
+
+        let d =
+            dienststellen[name];
+
+
+
+        let platz = "";
+
+
+
+        if (index === 0) {
+
+            platz = "🥇 ";
+
+        }
+
+        else if (index === 1) {
+
+            platz = "🥈 ";
+
+        }
+
+        else if (index === 2) {
+
+            platz = "🥉 ";
+
+        }
+
+
+
+        text +=
+
+
+        "<div class='statBlock'>" +
+
+
+        "<h3>" +
+
+        platz +
+
+        "🏢 " +
+
+        name +
+
+        "</h3>" +
+
+
+        "Teilnehmer: " +
+
+        d.anzahl +
+
+
+        "<br>Ø Punkte: " +
+
+        (
+            d.punkte /
+            d.anzahl
+        )
+        .toFixed(1) +
+
+
+        "<br>Beste Punkte: " +
+
+        d.beste +
+
+
+        "</div>";
+
+
+
+    });
+
+
+
+
+    document.getElementById(
+        "dienststellenAnalyse"
+    ).innerHTML = text;
+
+
+
+}
 
 
 
@@ -552,5 +743,7 @@ text +=
 
 
 
+
+ladeDienststellenAnalyse();
 
 ladeStatistik();
