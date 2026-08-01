@@ -655,6 +655,7 @@ async function quizEnde() {
 
         <button
             id="ranglistenButton"
+            style="display:none;"
             onclick="window.location.href='rangliste.html?id=${teilnehmerID}'"
         >
 
