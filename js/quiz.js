@@ -3,13 +3,27 @@ let ausgewaehlteAntwort = null;
 let punkte = 0;
 
 let fragen = [];
-
 let maxPunkte = 0;
 
-let quizStart = new Date();
+let teilnehmerID = localStorage.getItem("teilnehmer_id");
+
+
+
+const frageElement = document.getElementById("frage");
+const antwortBereich = document.getElementById("antwortBereich");
+const weiterButton = document.getElementById("weiterButton");
+
+const frageNummer = document.getElementById("frageNummer");
+const gesamtFragen = document.getElementById("gesamtFragen");
+const fortschritt = document.getElementById("fortschritt");
+
+
+
+/* =========================================================
+   FRAGEN LADEN
+========================================================= */
 
 async function ladeFragen() {
-
 
     const { data, error } = await supabaseClient
 
@@ -32,41 +46,37 @@ async function ladeFragen() {
     }
 
 
-    fragen = data;
+    fragen = data || [];
 
 
-alert("Fragen geladen: " + fragen.length);
-    
+    if (fragen.length === 0) {
+
+        alert("Es wurden keine Fragen gefunden.");
+
+        return;
+
+    }
+
 
     maxPunkte = fragen.reduce(function(summe, frage) {
 
-    return summe + frage.punkte;
+        return summe + Number(frage.punkte || 0);
 
-}, 0);
+    }, 0);
 
+
+    gesamtFragen.innerText = fragen.length;
 
 
     ladeFrage();
 
-
 }
 
 
-let teilnehmerID = localStorage.getItem("teilnehmer_id");
 
-
-const frageElement = document.getElementById("frage");
-const antwortBereich = document.getElementById("antwortBereich");
-const weiterButton = document.getElementById("weiterButton");
-
-const frageNummer = document.getElementById("frageNummer");
-const gesamtFragen = document.getElementById("gesamtFragen");
-const fortschritt = document.getElementById("fortschritt");
-
-
-gesamtFragen.innerText = fragen.length;
-
-
+/* =========================================================
+   AKTUELLE FRAGE ANZEIGEN
+========================================================= */
 
 function ladeFrage() {
 
@@ -81,101 +91,152 @@ function ladeFrage() {
     frageElement.innerText = frage.frage;
 
 
-    frageNummer.innerText = aktuelleFrage + 1;
+    frageNummer.innerText =
+        aktuelleFrage + 1;
 
 
-    let prozent = (aktuelleFrage / fragen.length) * 100;
+    let prozent =
+        (aktuelleFrage / fragen.length) * 100;
 
-    fortschritt.style.width = prozent + "%";
 
+    fortschritt.style.width =
+        prozent + "%";
 
 
     antwortBereich.innerHTML = "";
 
 
 
+    /* -------------------------
+       MULTIPLE CHOICE
+    ------------------------- */
+
     if (frage.typ === "mc") {
 
-
         [
-    frage.antwort_a,
-    frage.antwort_b,
-    frage.antwort_c,
-    frage.antwort_d
-].forEach(function(antwort, index) {
 
-            let element = document.createElement("div");
+            frage.antwort_a,
+            frage.antwort_b,
+            frage.antwort_c,
+            frage.antwort_d
 
-
-            element.className = "answer";
+        ].forEach(function(antwort, index) {
 
 
-            element.innerText = antwort;
+            /*
+             * Leere Antwortmöglichkeiten
+             * nicht anzeigen
+             */
+
+            if (
+                antwort === null ||
+                antwort === undefined ||
+                antwort === ""
+            ) {
+
+                return;
+
+            }
+
+
+            let element =
+                document.createElement("div");
+
+
+            element.className =
+                "answer";
+
+
+            element.innerText =
+                antwort;
 
 
 
             element.onclick = function() {
 
 
-                document.querySelectorAll(".answer").forEach(function(a) {
+                document
+                    .querySelectorAll(".answer")
+                    .forEach(function(a) {
 
-                    a.classList.remove("selected");
+                        a.classList.remove("selected");
 
-                });
-
+                    });
 
 
                 element.classList.add("selected");
 
 
+                ausgewaehlteAntwort =
+                    index;
 
-                ausgewaehlteAntwort = index;
 
-
-
-                weiterButton.disabled = false;
-
+                weiterButton.disabled =
+                    false;
 
             };
 
 
             antwortBereich.appendChild(element);
 
-
         });
-
 
     }
 
 
 
+    /* -------------------------
+       ZAHL / SCHÄTZFRAGE
+    ------------------------- */
+
     if (frage.typ === "zahl") {
 
 
-        let eingabe = document.createElement("input");
+        let eingabe =
+            document.createElement("input");
 
 
-        eingabe.type = "number";
+        eingabe.type =
+            "text";
 
 
-        eingabe.className = "answer";
+        eingabe.inputMode =
+            "decimal";
 
 
-        eingabe.placeholder = "Bitte Zahl eingeben";
+        eingabe.className =
+            "answer";
+
+
+        eingabe.placeholder =
+            "Bitte Zahl eingeben";
 
 
 
         eingabe.oninput = function() {
 
 
-            if (eingabe.value !== "") {
+            if (
+                eingabe.value.trim() !== ""
+            ) {
 
 
-                ausgewaehlteAntwort = eingabe.value;
+                ausgewaehlteAntwort =
+                    eingabe.value.replace(",", ".");
 
 
-                weiterButton.disabled = false;
+                weiterButton.disabled =
+                    false;
 
+            }
+
+            else {
+
+                ausgewaehlteAntwort =
+                    null;
+
+                weiterButton.disabled =
+                    true;
 
             }
 
@@ -184,60 +245,146 @@ function ladeFrage() {
 
         antwortBereich.appendChild(eingabe);
 
-
     }
 
 }
 
 
 
-
+/* =========================================================
+   WEITER BUTTON
+========================================================= */
 
 weiterButton.onclick = async function() {
 
 
-    if (ausgewaehlteAntwort === null) {
+    if (
+        ausgewaehlteAntwort === null
+    ) {
 
         return;
 
     }
 
 
-
-    const frage = fragen[aktuelleFrage];
+    const frage =
+        fragen[aktuelleFrage];
 
 
     let erhaltenePunkte = 0;
 
 
 
+    /* =====================================================
+       MULTIPLE CHOICE
+    ===================================================== */
+
     if (frage.typ === "mc") {
 
 
-        if (ausgewaehlteAntwort == frage.richtig) {
+        if (
+            ausgewaehlteAntwort ==
+            frage.richtig
+        ) {
 
 
-            punkte += frage.punkte;
-
-            erhaltenePunkte = frage.punkte;
-
+            erhaltenePunkte =
+                Number(frage.punkte);
 
         }
 
     }
 
 
+
+    /* =====================================================
+       SCHÄTZFRAGE
+    ===================================================== */
 
     if (frage.typ === "zahl") {
 
 
-        if (Number(ausgewaehlteAntwort) === frage.loesung) {
+        let antwort =
+            Number(ausgewaehlteAntwort);
 
 
-            punkte += frage.punkte;
+        let loesung =
+            Number(frage.loesung);
 
-            erhaltenePunkte = frage.punkte;
 
+        let toleranz =
+            Number(frage.toleranz || 0);
+
+
+        let abweichung =
+            Math.abs(
+                antwort - loesung
+            );
+
+
+
+        /*
+         * Exakte Lösung
+         */
+
+        if (abweichung === 0) {
+
+
+            erhaltenePunkte =
+                Number(frage.punkte);
+
+        }
+
+
+        /*
+         * Innerhalb der Toleranz
+         */
+
+        else if (
+            toleranz > 0 &&
+            abweichung <= toleranz
+        ) {
+
+
+            erhaltenePunkte =
+                Math.round(
+
+                    Number(frage.punkte) *
+
+                    (
+                        1 -
+                        (
+                            abweichung /
+                            toleranz
+                        )
+                    )
+
+                );
+
+
+            /*
+             * Mindestens 1 Punkt
+             */
+
+            if (
+                erhaltenePunkte < 1
+            ) {
+
+                erhaltenePunkte = 1;
+
+            }
+
+        }
+
+
+        /*
+         * Außerhalb der Toleranz
+         * = 0 Punkte
+         */
+
+        else {
+
+            erhaltenePunkte = 0;
 
         }
 
@@ -245,33 +392,57 @@ weiterButton.onclick = async function() {
 
 
 
-    const { error } = await supabaseClient
+    /*
+     * Punkte zum Gesamtergebnis addieren
+     */
 
-    .from("Antworten")
-
-    .insert([
-
-        {
-
-            teilnehmer_id: teilnehmerID,
-
-            frage_nr: aktuelleFrage + 1,
-
-            antwort: String(ausgewaehlteAntwort),
-
-            punkte: erhaltenePunkte
-
-        }
-
-    ]);
+    punkte +=
+        erhaltenePunkte;
 
 
 
-    if(error) {
+    /* =====================================================
+       ANTWORT IN SUPABASE SPEICHERN
+    ===================================================== */
+
+    const { error } =
+        await supabaseClient
+
+        .from("Antworten")
+
+        .insert([
+
+            {
+
+                teilnehmer_id:
+                    teilnehmerID,
+
+                frage_nr:
+                    aktuelleFrage + 1,
+
+                antwort:
+                    String(ausgewaehlteAntwort),
+
+                punkte:
+                    erhaltenePunkte
+
+            }
+
+        ]);
+
+
+
+    if (error) {
+
 
         console.log(error);
 
-        alert("Antwort konnte nicht gespeichert werden.");
+
+        alert(
+            "Antwort konnte nicht gespeichert werden:\n\n" +
+            error.message
+        );
+
 
         return;
 
@@ -279,14 +450,21 @@ weiterButton.onclick = async function() {
 
 
 
+    /* =====================================================
+       NÄCHSTE FRAGE
+    ===================================================== */
+
     aktuelleFrage++;
 
 
 
-    if (aktuelleFrage >= fragen.length) {
+    if (
+        aktuelleFrage >=
+        fragen.length
+    ) {
 
 
-        quizEnde();
+        await quizEnde();
 
 
         return;
@@ -297,75 +475,47 @@ weiterButton.onclick = async function() {
 
     ladeFrage();
 
-
 };
 
 
 
-
-
-
+/* =========================================================
+   QUIZ ENDE
+========================================================= */
 
 async function quizEnde() {
 
 
-    const endzeit = new Date();
+    const endzeit =
+        new Date();
 
 
 
-    const { data: teilnehmer, error: abrufFehler } = await supabaseClient
+    const {
 
-    .from("Teilnehmer")
+        data: teilnehmer,
 
-    .select("startzeit")
+        error: abrufFehler
 
-    .eq("id", teilnehmerID)
+    } = await supabaseClient
 
-    .single();
+        .from("Teilnehmer")
+
+        .select("startzeit")
+
+        .eq("id", teilnehmerID)
+
+        .single();
 
 
 
     if (abrufFehler) {
 
-        alert("Startzeit konnte nicht geladen werden.");
-
-        return;
-
-    }
-
-
-
-    const dauer = endzeit - new Date(teilnehmer.startzeit + "Z");
-
-
-    const minuten = Math.floor(dauer / 60000);
-
-    const sekunden = Math.floor((dauer % 60000) / 1000);
-
-
-
-    const { error } = await supabaseClient
-
-    .from("Teilnehmer")
-
-    .update({
-
-        gesamtpunkte: punkte,
-
-        endezeit: endzeit
-
-    })
-
-    .eq("id", teilnehmerID);
-
-
-
-    if(error) {
 
         alert(
-            "Fehler beim Speichern:\n\n" 
-            + error.message
+            "Startzeit konnte nicht geladen werden."
         );
+
 
         return;
 
@@ -373,68 +523,432 @@ async function quizEnde() {
 
 
 
-    document.querySelector(".container").innerHTML = `
+    const dauer =
+        endzeit -
+        new Date(
+            teilnehmer.startzeit + "Z"
+        );
 
 
-    <h1>🎉 Quiz abgeschlossen</h1>
+
+    const minuten =
+        Math.floor(
+            dauer / 60000
+        );
 
 
-    <p class="subtitle">
+    const sekunden =
+        Math.floor(
+            (dauer % 60000) / 1000
+        );
 
 
-    Vielen Dank für deine Teilnahme!
+
+    /* =====================================================
+       ERGEBNIS SPEICHERN
+    ===================================================== */
+
+    const { error } =
+        await supabaseClient
+
+        .from("Teilnehmer")
+
+        .update({
+
+            gesamtpunkte:
+                punkte,
+
+            endezeit:
+                endzeit
+
+        })
+
+        .eq("id", teilnehmerID);
 
 
-    <br><br>
+
+    if (error) {
 
 
-    Dein Ergebnis:
+        alert(
+            "Fehler beim Speichern:\n\n" +
+            error.message
+        );
 
 
-    <br><br>
+        return;
+
+    }
 
 
-    <strong>${punkte}</strong>
 
-    von
+    /* =====================================================
+       ERGEBNISSEITE
+    ===================================================== */
 
-    <strong>${maxPunkte}</strong>
+    document.querySelector(
+        ".container"
+    ).innerHTML = `
 
-    Punkten
-
-
-    <br><br><br>
-
-
-    ⏱ Bearbeitungszeit:
+        <h1>🎉 Quiz abgeschlossen</h1>
 
 
-    <br>
+        <div class="subtitle">
+
+            <p>
+                Vielen Dank für deine Teilnahme!
+            </p>
 
 
-    <strong>${minuten} Minuten ${sekunden} Sekunden</strong>
+            <p>
+                Dein Ergebnis:
+            </p>
 
 
-    <br><br>
+            <p>
+
+                <strong>
+                    ${punkte}
+                </strong>
+
+                von
+
+                <strong>
+                    ${maxPunkte}
+                </strong>
+
+                Punkten
+
+            </p>
 
 
-    <button onclick="window.location.href='rangliste.html?id=${teilnehmerID}'">
+            <p>
 
-    🏆 Zur Rangliste
+                ⏱ Bearbeitungszeit:
 
-    </button>
+                <br>
+
+                <strong>
+
+                    ${minuten} Minuten
+                    ${sekunden} Sekunden
+
+                </strong>
+
+            </p>
+
+        </div>
 
 
-    </p>
 
+        <div id="umfragenBereich">
+
+            Umfrage wird geladen...
+
+        </div>
+
+
+
+        <br>
+
+
+
+        <button
+            id="ranglistenButton"
+            onclick="window.location.href='rangliste.html?id=${teilnehmerID}'"
+        >
+
+            🏆 Zur Rangliste
+
+        </button>
 
     `;
 
+
+
+    /*
+     * Jetzt Umfragen laden
+     */
+
+    await ladeUmfragen();
 
 }
 
 
 
+/* =========================================================
+   UMFRAGEN LADEN
+========================================================= */
 
+async function ladeUmfragen() {
+
+
+    const bereich =
+        document.getElementById(
+            "umfragenBereich"
+        );
+
+
+    if (!bereich) {
+
+        return;
+
+    }
+
+
+
+    const {
+
+        data,
+        error
+
+    } = await supabaseClient
+
+        .from("Umfragen")
+
+        .select("*")
+
+        .eq("aktiv", true)
+
+        .order("reihenfolge");
+
+
+
+    if (error) {
+
+
+        console.log(
+            "Umfrage Fehler:",
+            error
+        );
+
+
+        bereich.innerHTML = `
+
+            <p>
+                Umfrage konnte nicht geladen werden.
+            </p>
+
+        `;
+
+
+        return;
+
+    }
+
+
+
+    /*
+     * Keine aktiven Umfragen
+     */
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+
+        bereich.innerHTML = "";
+
+        return;
+
+    }
+
+
+
+    let html = "";
+
+
+    html += `
+
+        <hr style="margin:35px 0;">
+
+        <h2>📝 Deine Rückmeldung</h2>
+
+        <p>
+            Wie hat dir das Quiz gefallen?
+        </p>
+
+    `;
+
+
+
+    data.forEach(function(umfrage) {
+
+
+        html += `
+
+            <div class="statBlock">
+
+                <h3>
+                    ${umfrage.frage}
+                </h3>
+
+        `;
+
+
+
+        /*
+         * Sterne-Frage
+         */
+
+        if (
+            umfrage.typ === "sterne"
+        ) {
+
+
+            html += `
+
+                <div class="umfrageSterne">
+
+                    <button
+                        onclick="speichereUmfrage(${umfrage.id}, 1, this)"
+                    >
+                        ⭐
+                    </button>
+
+
+                    <button
+                        onclick="speichereUmfrage(${umfrage.id}, 2, this)"
+                    >
+                        ⭐⭐
+                    </button>
+
+
+                    <button
+                        onclick="speichereUmfrage(${umfrage.id}, 3, this)"
+                    >
+                        ⭐⭐⭐
+                    </button>
+
+
+                    <button
+                        onclick="speichereUmfrage(${umfrage.id}, 4, this)"
+                    >
+                        ⭐⭐⭐⭐
+                    </button>
+
+
+                    <button
+                        onclick="speichereUmfrage(${umfrage.id}, 5, this)"
+                    >
+                        ⭐⭐⭐⭐⭐
+                    </button>
+
+                </div>
+
+            `;
+
+        }
+
+
+
+        html += `
+
+            </div>
+
+        `;
+
+    });
+
+
+
+    bereich.innerHTML =
+        html;
+
+}
+
+
+
+/* =========================================================
+   UMFRAGE ANTWORT SPEICHERN
+========================================================= */
+
+async function speichereUmfrage(
+    frageID,
+    antwort,
+    button
+) {
+
+
+    const { error } =
+        await supabaseClient
+
+        .from("Bewertungen")
+
+        .insert([
+
+            {
+
+                teilnehmer_id:
+                    teilnehmerID,
+
+                frage:
+                    String(frageID),
+
+                antwort:
+                    String(antwort)
+
+            }
+
+        ]);
+
+
+
+    if (error) {
+
+
+        console.log(error);
+
+
+        alert(
+
+            "Antwort konnte nicht gespeichert werden:\n\n" +
+            error.message
+
+        );
+
+
+        return;
+
+    }
+
+
+
+    /*
+     * Buttons deaktivieren
+     */
+
+    button.parentElement
+        .querySelectorAll("button")
+        .forEach(function(b) {
+
+            b.disabled = true;
+
+        });
+
+
+
+    /*
+     * Danke anzeigen
+     */
+
+    button.parentElement
+        .parentElement
+        .insertAdjacentHTML(
+
+            "beforeend",
+
+            "<p>Danke für deine Rückmeldung! 👍</p>"
+
+        );
+
+}
+
+
+
+/* =========================================================
+   START
+========================================================= */
 
 ladeFragen();

@@ -661,8 +661,9 @@ else if (diff === kleinsteAbweichung) {
 
 
 
-let besteAbweichung = Math.abs(beste - frage.loesung);
-
+let besteAbweichung = Number(
+    Math.abs(beste - frage.loesung).toFixed(1)
+);
 
 text +=
 
@@ -741,9 +742,83 @@ bereich.appendChild(block);
 
 
 
+async function ladeUmfragenAnalyse() {
+
+    const { data, error } = await supabaseClient
+
+        .from("Bewertungen")
+
+        .select("frage, antwort");
+
+    const { data: umfragen } = await supabaseClient
+
+        .from("Umfragen")
+
+        .select("id, frage");
 
 
+    if (error) {
 
+        console.log(error);
+
+        return;
+
+    }
+
+
+let gruppen = {};
+
+data.forEach(function(a) {
+
+    if (!gruppen[a.frage]) {
+
+        gruppen[a.frage] = [];
+
+    }
+
+    gruppen[a.frage].push(Number(a.antwort));
+
+});
+
+let text = "";
+
+Object.keys(gruppen).forEach(function(frage) {
+
+    let antworten = gruppen[frage];
+
+    let summe = antworten.reduce(function(a, b) {
+        return a + b;
+    }, 0);
+
+    let durchschnitt =
+        (summe / antworten.length).toFixed(1);
+
+    let umfrage = umfragen.find(function(u) {
+        return Number(u.id) === Number(frage);
+    });
+
+    let titel = umfrage ? umfrage.frage : frage;
+
+    text +=
+
+        "<div class='statBlock'>" +
+
+        "<h3>" + titel + "</h3>" +
+
+        "⭐ " + durchschnitt +
+
+        " (" + antworten.length + " Bewertungen)" +
+
+        "</div>";
+
+});
+
+document.getElementById("umfragenAnalyse").innerHTML = text;
+
+}
 ladeDienststellenAnalyse();
 
 ladeStatistik();
+
+ladeUmfragenAnalyse();
+

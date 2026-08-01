@@ -331,3 +331,22 @@ td {
     }
 
 }
+
+.umfrageSterne {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.umfrageSterne button {
+    width: auto;
+    margin-top: 0;
+    padding: 10px 14px;
+    font-size: 18px;
+}
+
+.umfrageSterne button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
