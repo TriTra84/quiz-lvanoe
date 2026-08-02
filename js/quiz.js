@@ -726,6 +726,8 @@ async function ladeUmfragen() {
 
         bereich.innerHTML = `
 
+        document.getElementById("ranglistenButton").style.display = "inline-block";
+
             <p>
                 Umfrage konnte nicht geladen werden.
             </p>
