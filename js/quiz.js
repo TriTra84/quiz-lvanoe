@@ -641,27 +641,17 @@ async function quizEnde() {
 
 
 
-        <div id="umfragenBereich">
+<button
+    id="ranglistenButton"
+    style="background:red;color:white;font-size:22px;padding:20px;display:block;"
+    onclick="window.location.href='rangliste.html?id=${teilnehmerID}'"
+>
+    🏆 TEST RANGLISTE
+</button>
 
-            Umfrage wird geladen...
-
-        </div>
-
-
-
-        <br>
-
-
-
-        <button
-            id="ranglistenButton"
-            style="display:none;"
-            onclick="window.location.href='rangliste.html?id=${teilnehmerID}'"
-        >
-
-            🏆 Zur Rangliste
-
-        </button>
+<div id="umfragenBereich">
+    Umfrage wird geladen...
+</div>
 
     `;
 
@@ -725,8 +715,6 @@ async function ladeUmfragen() {
 
 
         bereich.innerHTML = `
-
-        document.getElementById("ranglistenButton").style.display = "inline-block";
 
             <p>
                 Umfrage konnte nicht geladen werden.

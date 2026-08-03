@@ -46,6 +46,13 @@ Verbesserungen:
 - Überarbeitete Statistikseite
 - Stabilere Datenbankabfragen
 
+
+Version 2.5
+Umfragen nach Quizabschluss
+Sternebewertungen mit Speicherung in Supabase
+Umfrageauswertung in der Statistik
+Verbesserte Statistikansicht
+GitHub-Authentifizierung aktualisiert
 ---
 
 Projekt von Andreas
