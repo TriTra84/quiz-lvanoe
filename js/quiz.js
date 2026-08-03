@@ -643,11 +643,12 @@ async function quizEnde() {
 
 <button
     id="ranglistenButton"
-    style="background:red;color:white;font-size:22px;padding:20px;display:block;"
     onclick="window.location.href='rangliste.html?id=${teilnehmerID}'"
 >
-    🏆 TEST RANGLISTE
+    🏆 Zur Rangliste
 </button>
+
+<br><br>
 
 <div id="umfragenBereich">
     Umfrage wird geladen...
