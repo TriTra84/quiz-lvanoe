@@ -705,6 +705,17 @@ async function ladeUmfragen() {
         .order("reihenfolge");
 
 
+    
+    const { data: bereitsBewertet } =
+    await supabaseClient
+
+        .from("Bewertungen")
+
+        .select("frage")
+
+        .eq("teilnehmer_id", teilnehmerID);
+
+
 
     if (error) {
 
@@ -768,6 +779,14 @@ async function ladeUmfragen() {
     data.forEach(function(umfrage) {
 
 
+        let schonBewertet =
+    bereitsBewertet.some(function(b) {
+
+        return Number(b.frage) === umfrage.id;
+
+    });
+
+
         html += `
 
             <div class="statBlock">
@@ -794,37 +813,42 @@ async function ladeUmfragen() {
                 <div class="umfrageSterne">
 
                     <button
-                        onclick="speichereUmfrage(${umfrage.id}, 1, this)"
+                        onclick="speichereUmfrage(${umfrage.id}, 5, this)"
+                        ${schonBewertet ? "disabled" : ""}
                     >
-                        ⭐
-                    </button>
-
-
-                    <button
-                        onclick="speichereUmfrage(${umfrage.id}, 2, this)"
-                    >
-                        ⭐⭐
-                    </button>
-
-
-                    <button
-                        onclick="speichereUmfrage(${umfrage.id}, 3, this)"
-                    >
-                        ⭐⭐⭐
+                        ⭐⭐⭐⭐⭐
                     </button>
 
 
                     <button
                         onclick="speichereUmfrage(${umfrage.id}, 4, this)"
+                        ${schonBewertet ? "disabled" : ""}
                     >
                         ⭐⭐⭐⭐
                     </button>
 
 
                     <button
-                        onclick="speichereUmfrage(${umfrage.id}, 5, this)"
+                        onclick="speichereUmfrage(${umfrage.id}, 3, this)"
+                        ${schonBewertet ? "disabled" : ""}
                     >
-                        ⭐⭐⭐⭐⭐
+                        ⭐⭐⭐
+                    </button>
+
+
+                    <button
+                        onclick="speichereUmfrage(${umfrage.id}, 2, this)"
+                        ${schonBewertet ? "disabled" : ""}
+                    >
+                        ⭐⭐
+                    </button>
+
+
+                    <button
+                        onclick="speichereUmfrage(${umfrage.id}, 1, this)"
+                        ${schonBewertet ? "disabled" : ""}
+                    >
+                        ⭐
                     </button>
 
                 </div>
@@ -833,7 +857,31 @@ async function ladeUmfragen() {
 
         }
 
+if (umfrage.typ === "text") {
 
+    html += `
+
+        <textarea
+            id="feedback_${umfrage.id}"
+            rows="5"
+            ${schonBewertet ? "disabled" : ""}
+            style="width:100%;padding:10px;box-sizing:border-box;"
+            placeholder="${umfrage.placeholder}"
+        ></textarea>
+
+        <br><br>
+
+        <button
+            id="button_${umfrage.id}"
+            onclick="speichereTextUmfrage(${umfrage.id})"
+            ${schonBewertet ? "disabled" : ""}
+        >
+            📨 Antwort senden
+        </button>
+
+    `;
+
+}
 
         html += `
 
@@ -937,7 +985,76 @@ async function speichereUmfrage(
 
 }
 
+async function speichereTextUmfrage(frageID) {
 
+    let feld =
+        document.getElementById(
+            "feedback_" + frageID
+        );
+
+    let text =
+        feld.value.trim();
+
+    if (text === "") {
+
+        alert(
+            "Bitte gib zuerst einen Text ein."
+        );
+
+        return;
+
+    }
+
+    const { error } =
+        await supabaseClient
+
+            .from("Bewertungen")
+
+            .insert([
+
+                {
+
+                    teilnehmer_id:
+                        teilnehmerID,
+
+                    frage:
+                        String(frageID),
+
+                    antwort:
+                        text
+
+                }
+
+            ]);
+
+    if (error) {
+
+        alert(
+            "Feedback konnte nicht gespeichert werden."
+        );
+
+        console.log(error);
+
+        return;
+
+    }
+    
+let button =
+    document.getElementById(
+        "button_" + frageID
+    );
+
+feld.disabled = true;
+
+button.disabled = true;
+
+button.insertAdjacentHTML(
+    "afterend",
+    "<p>Danke für dein Feedback! 👍</p>"
+);
+
+
+}
 
 /* =========================================================
    START

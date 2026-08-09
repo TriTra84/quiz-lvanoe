@@ -744,17 +744,20 @@ bereich.appendChild(block);
 
 async function ladeUmfragenAnalyse() {
 
-    const { data, error } = await supabaseClient
+    const { data, error } =
+        await supabaseClient
 
-        .from("Bewertungen")
+            .from("Bewertungen")
 
-        .select("frage, antwort");
+            .select("frage, antwort");
 
-    const { data: umfragen } = await supabaseClient
 
-        .from("Umfragen")
+    const { data: umfragen } =
+        await supabaseClient
 
-        .select("id, frage");
+            .from("Umfragen")
+
+            .select("id, frage, typ");
 
 
     if (error) {
@@ -766,59 +769,286 @@ async function ladeUmfragenAnalyse() {
     }
 
 
-let gruppen = {};
+    let gruppen = {};
 
-data.forEach(function(a) {
 
-    if (!gruppen[a.frage]) {
+    data.forEach(function(a) {
 
-        gruppen[a.frage] = [];
+        if (!gruppen[a.frage]) {
+
+            gruppen[a.frage] = [];
+
+        }
+
+        gruppen[a.frage].push(
+            Number(a.antwort)
+        );
+
+    });
+
+
+    let text = "";
+
+
+    Object.keys(gruppen).forEach(function(frage) {
+
+        let antworten =
+            gruppen[frage];
+
+
+        let summe =
+            antworten.reduce(
+                function(a, b) {
+                    return a + b;
+                },
+                0
+            );
+
+
+        let durchschnitt =
+            (
+                summe /
+                antworten.length
+            ).toFixed(1);
+
+
+        let umfrage =
+            umfragen.find(function(u) {
+
+                return Number(u.id) ===
+                    Number(frage);
+
+            });
+
+
+        /*
+         * Nur Sternefragen anzeigen
+         */
+
+        if (
+            !umfrage ||
+            umfrage.typ !== "sterne"
+        ) {
+
+            return;
+
+        }
+
+
+        let titel =
+            umfrage.frage;
+
+
+        text +=
+
+            "<div class='statBlock'>" +
+
+            "<h3>" +
+            titel +
+            "</h3>" +
+
+            "⭐ " +
+            durchschnitt +
+
+            " (" +
+            antworten.length +
+            " Bewertungen)" +
+
+            "</div>";
+
+    });
+
+
+    document.getElementById(
+        "umfragenAnalyse"
+    ).innerHTML = text;
+
+}
+
+
+/* =========================================================
+   KOMMENTARE
+========================================================= */
+
+async function ladeKommentareAnalyse() {
+
+    const bereich =
+        document.getElementById(
+            "kommentareAnalyse"
+        );
+
+
+    const { data, error } =
+        await supabaseClient
+
+            .from("Bewertungen")
+
+            .select("id, frage, antwort")
+
+            .order(
+                "id",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        console.log(
+            "Fehler Kommentare:",
+            error
+        );
+
+
+        bereich.innerHTML =
+            "<p>Fehler beim Laden der Kommentare.</p>";
+
+        return;
 
     }
 
-    gruppen[a.frage].push(Number(a.antwort));
 
-});
+    const { data: umfragen } =
+        await supabaseClient
 
-let text = "";
+            .from("Umfragen")
 
-Object.keys(gruppen).forEach(function(frage) {
+            .select(
+                "id, frage, typ"
+            );
 
-    let antworten = gruppen[frage];
 
-    let summe = antworten.reduce(function(a, b) {
-        return a + b;
-    }, 0);
+    /*
+     * Kommentare nach Frage gruppieren
+     */
 
-    let durchschnitt =
-        (summe / antworten.length).toFixed(1);
+    let gruppen = {};
 
-    let umfrage = umfragen.find(function(u) {
-        return Number(u.id) === Number(frage);
+
+    data.forEach(function(a) {
+
+        let umfrage =
+            umfragen.find(function(u) {
+
+                return Number(u.id) ===
+                    Number(a.frage);
+
+            });
+
+
+        /*
+         * Nur Textfragen berücksichtigen
+         */
+
+        if (
+            !umfrage ||
+            umfrage.typ !== "text"
+        ) {
+
+            return;
+
+        }
+
+
+        if (!gruppen[a.frage]) {
+
+            gruppen[a.frage] = {
+
+                frage:
+                    umfrage.frage,
+
+                antworten: []
+
+            };
+
+        }
+
+
+        gruppen[a.frage].antworten.push(
+            a.antwort
+        );
+
     });
 
-    let titel = umfrage ? umfrage.frage : frage;
 
-    text +=
+    let text = "";
 
-        "<div class='statBlock'>" +
 
-        "<h3>" + titel + "</h3>" +
+    /*
+     * Eine Kachel pro Frage
+     */
 
-        "⭐ " + durchschnitt +
+    Object.keys(gruppen).forEach(
+        function(frageID) {
 
-        " (" + antworten.length + " Bewertungen)" +
+            let gruppe =
+                gruppen[frageID];
 
-        "</div>";
 
-});
+            text +=
 
-document.getElementById("umfragenAnalyse").innerHTML = text;
+                "<div class='statBlock'>" +
+
+                "<h3>💬 " +
+                gruppe.frage +
+                "</h3>" +
+
+                "<div>";
+
+
+            /*
+             * Antworten untereinander anzeigen
+             */
+
+            gruppe.antworten.forEach(
+                function(antwort) {
+
+                    text +=
+
+                        "<p style='margin:12px 0;padding:10px;background:#fff;border-radius:8px;border:1px solid #ddd;'>" +
+
+                        "💬 " +
+                        antwort +
+
+                        "</p>";
+
+                }
+            );
+
+
+            text +=
+
+                "</div>" +
+
+                "</div>";
+
+        }
+    );
+
+
+    if (text === "") {
+
+        text =
+            "<p>Noch keine Kommentare vorhanden.</p>";
+
+    }
+
+
+    bereich.innerHTML =
+        text;
 
 }
+
+
+/* =========================================================
+   START
+========================================================= */
+
 ladeDienststellenAnalyse();
 
 ladeStatistik();
 
 ladeUmfragenAnalyse();
 
+ladeKommentareAnalyse();
