@@ -350,3 +350,37 @@ td {
     opacity: 0.5;
     cursor: default;
 }
+
+/* =========================================================
+   ABSTIMMUNG
+========================================================= */
+
+.umfrageAbstimmung {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.abstimmungsButton {
+    width: 100%;
+    margin-top: 0;
+    padding: 14px;
+    font-size: 17px;
+    text-align: left;
+    background: #f7f9fc;
+    color: #003366;
+    border: 2px solid #d9e2ec;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.abstimmungsButton:hover {
+    background: #e8eef5;
+    border-color: #005baa;
+}
+
+.abstimmungsButton:disabled {
+    opacity: 0.6;
+    cursor: default;
+}

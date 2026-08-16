@@ -705,7 +705,28 @@ async function ladeUmfragen() {
         .order("reihenfolge");
 
 
+
+
+    const {
+    data: abstimmungsOptionen,
+    error: optionenFehler
+} = await supabaseClient
+    .from("AbstimmungsOptionen")
+    .select("*")
+    .eq("aktiv", true)
+    .order("reihenfolge");
+
+if (optionenFehler) {
+
+    console.log(
+        "Abstimmungsoptionen Fehler:",
+        optionenFehler
+    );
+
+}
     
+
+
     const { data: bereitsBewertet } =
     await supabaseClient
 
@@ -883,6 +904,70 @@ if (umfrage.typ === "text") {
 
 }
 
+
+
+/* =========================================================
+   ABSTIMMUNG
+========================================================= */
+
+if (umfrage.typ === "abstimmung") {
+
+    const optionen =
+        abstimmungsOptionen.filter(function(option) {
+
+            return Number(option.umfrage_id) ===
+                Number(umfrage.id);
+
+        });
+
+
+    html += `
+
+        <div class="umfrageAbstimmung">
+
+    `;
+
+
+    optionen.forEach(function(option) {
+
+        html += `
+
+            <button
+                class="abstimmungsButton"
+                onclick="speichereAbstimmung(
+                    ${umfrage.id},
+                    '${String(option.antwort)
+                        .replace(/'/g, "\\'")}',
+                    this
+                )"
+            >
+
+                ${option.antwort}
+
+            </button>
+
+        `;
+
+    });
+
+
+    html += `
+
+        </div>
+
+    `;
+
+}
+
+
+html += `
+
+    </div>
+
+`;
+
+
+
         html += `
 
             </div>
@@ -1053,6 +1138,101 @@ button.insertAdjacentHTML(
     "<p>Danke für dein Feedback! 👍</p>"
 );
 
+
+}
+
+/* =========================================================
+   ABSTIMMUNG SPEICHERN
+========================================================= */
+
+async function speichereAbstimmung(
+    frageID,
+    antwort,
+    button
+) {
+
+    /*
+     * Alle Abstimmungsbuttons sofort deaktivieren
+     */
+
+    const buttons =
+        button.parentElement
+            .querySelectorAll(
+                ".abstimmungsButton"
+            );
+
+
+    buttons.forEach(function(b) {
+
+        b.disabled = true;
+
+    });
+
+
+    const { error } =
+        await supabaseClient
+
+            .from("Bewertungen")
+
+            .insert([
+
+                {
+
+                    teilnehmer_id:
+                        teilnehmerID,
+
+                    frage:
+                        String(frageID),
+
+                    antwort:
+                        antwort
+
+                }
+
+            ]);
+
+
+    if (error) {
+
+        console.log(
+            "Abstimmung Fehler:",
+            error
+        );
+
+
+        alert(
+            "Abstimmung konnte nicht gespeichert werden:\n\n" +
+            error.message
+        );
+
+
+        /*
+         * Bei Fehler Buttons wieder aktivieren
+         */
+
+        buttons.forEach(function(b) {
+
+            b.disabled = false;
+
+        });
+
+
+        return;
+
+    }
+
+
+    /*
+     * Danke anzeigen
+     */
+
+    button.parentElement.insertAdjacentHTML(
+
+        "afterend",
+
+        "<p>Danke für deine Abstimmung! 👍</p>"
+
+    );
 
 }
 

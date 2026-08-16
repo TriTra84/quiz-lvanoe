@@ -1042,6 +1042,224 @@ async function ladeKommentareAnalyse() {
 
 
 /* =========================================================
+   ABSTIMMUNGSAUSWERTUNG
+========================================================= */
+
+async function ladeAbstimmungenAnalyse() {
+
+    const bereich =
+        document.getElementById(
+            "abstimmungenAnalyse"
+        );
+
+
+    const { data, error } =
+        await supabaseClient
+
+            .from("Bewertungen")
+
+            .select("frage, antwort");
+
+
+    if (error) {
+
+        console.log(
+            "Fehler Abstimmungen:",
+            error
+        );
+
+
+        bereich.innerHTML =
+            "<p>Abstimmungen konnten nicht geladen werden.</p>";
+
+        return;
+
+    }
+
+
+    const { data: umfragen } =
+        await supabaseClient
+
+            .from("Umfragen")
+
+            .select(
+                "id, frage, typ"
+            );
+
+
+    /*
+     * Nur Abstimmungen berücksichtigen
+     */
+
+    const abstimmungen =
+        umfragen.filter(function(umfrage) {
+
+            return umfrage.typ ===
+                "abstimmung";
+
+        });
+
+
+    let text = "";
+
+
+    abstimmungen.forEach(
+        function(umfrage) {
+
+            /*
+             * Antworten dieser Abstimmung
+             */
+
+            const antworten =
+                data.filter(function(a) {
+
+                    return Number(a.frage) ===
+                        Number(umfrage.id);
+
+                });
+
+
+            /*
+             * Keine Antworten
+             */
+
+            if (
+                antworten.length === 0
+            ) {
+
+                text +=
+
+                    "<div class='statBlock'>" +
+
+                    "<h3>🗳️ " +
+                    umfrage.frage +
+                    "</h3>" +
+
+                    "<p>Noch keine Stimmen vorhanden.</p>" +
+
+                    "</div>";
+
+                return;
+
+            }
+
+
+            /*
+             * Stimmen nach Antwort zählen
+             */
+
+            let stimmen = {};
+
+
+            antworten.forEach(
+                function(a) {
+
+                    if (!stimmen[a.antwort]) {
+
+                        stimmen[a.antwort] = 0;
+
+                    }
+
+
+                    stimmen[a.antwort]++;
+
+                }
+            );
+
+
+            text +=
+
+                "<div class='statBlock'>" +
+
+                "<h3>🗳️ " +
+                umfrage.frage +
+                "</h3>";
+
+
+            /*
+             * Antworten anzeigen
+             */
+
+            Object.keys(stimmen).forEach(
+                function(antwort) {
+
+                    const anzahl =
+                        stimmen[antwort];
+
+
+                    const prozent =
+                        (
+                            anzahl /
+                            antworten.length *
+                            100
+                        ).toFixed(1);
+
+
+text +=
+
+    "<div style='margin:15px 0;'>" +
+
+        "<div style='display:flex;justify-content:space-between;margin-bottom:5px;'>" +
+
+            "<strong>" +
+            antwort +
+            "</strong>" +
+
+            "<span>" +
+            anzahl +
+            " Stimmen (" +
+            prozent +
+            "%)" +
+            "</span>" +
+
+        "</div>" +
+
+        "<div style='width:100%;height:18px;background:#e1e6eb;border-radius:10px;overflow:hidden;'>" +
+
+            "<div style='width:" +
+            prozent +
+            "%;height:100%;background:#005baa;border-radius:10px;'>" +
+
+            "</div>" +
+
+        "</div>" +
+
+    "</div>";
+
+                }
+            );
+
+
+            text +=
+
+                "<p>" +
+
+                "<strong>" +
+                antworten.length +
+                " Stimmen insgesamt</strong>" +
+
+                "</p>" +
+
+                "</div>";
+
+        }
+    );
+
+
+    if (text === "") {
+
+        text =
+            "<p>Keine Abstimmungen vorhanden.</p>";
+
+    }
+
+
+    bereich.innerHTML =
+        text;
+
+}
+
+/* =========================================================
    START
 ========================================================= */
 
@@ -1052,3 +1270,5 @@ ladeStatistik();
 ladeUmfragenAnalyse();
 
 ladeKommentareAnalyse();
+
+ladeAbstimmungenAnalyse();
